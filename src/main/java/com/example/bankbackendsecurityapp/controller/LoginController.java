@@ -5,6 +5,7 @@ import com.example.bankbackendsecurityapp.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -14,12 +15,14 @@ import org.springframework.web.bind.annotation.RestController;
 public class LoginController {
 
     private final CustomerRepository customerRepository;
+    private final PasswordEncoder passwordEncoder;
 
     @PostMapping("/register")
     public ResponseEntity<String> registerUser(@RequestBody Customer customer)
     {
         try {
-            Customer savedCustomer = customerRepository.save(customer);
+            customer.setPwd(passwordEncoder.encode(customer.getPwd()));
+            customerRepository.save(customer);
             return ResponseEntity.status(HttpStatus.CREATED)
                     .body("Customer successfully registered");
         }catch (Exception ex)
