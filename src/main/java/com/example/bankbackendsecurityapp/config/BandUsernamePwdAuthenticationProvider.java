@@ -1,5 +1,6 @@
 package com.example.bankbackendsecurityapp.config;
 
+import com.example.bankbackendsecurityapp.model.Authority;
 import com.example.bankbackendsecurityapp.model.Customer;
 import com.example.bankbackendsecurityapp.repository.CustomerRepository;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 @Component
 @RequiredArgsConstructor
@@ -32,13 +34,20 @@ public class BandUsernamePwdAuthenticationProvider implements AuthenticationProv
         }else{
                 if(passwordEncoder.matches(pwd, customer.getPwd()))
                 {
-                    List<GrantedAuthority> authorities = new ArrayList<>();
-                    authorities.add(new SimpleGrantedAuthority(customer.getRole()));
-                    return new UsernamePasswordAuthenticationToken(username,pwd,authorities);
+
+                    return new UsernamePasswordAuthenticationToken(username,pwd,getGrantedAuthorities(customer.getAuthorities()));
                 }else{
                         throw new BadCredentialsException("Invalid password");
                 }
         }
+    }
+
+    private List<GrantedAuthority> getGrantedAuthorities(Set<Authority> authorities) {
+        List<GrantedAuthority> grantedAuthorities = new ArrayList<>();
+        for (Authority authority : authorities) {
+            grantedAuthorities.add(new SimpleGrantedAuthority(authority.getName()));
+        }
+        return grantedAuthorities;
     }
 
     @Override
